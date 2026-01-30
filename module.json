@@ -1,7 +1,7 @@
 {
-  "id": "test",
-  "title": "test",
-  "description": "test",
+  "id": "sr5-hud",
+  "title": "Shadowrun 5e HUD",
+  "description": "A Simple Hud module for the Shadowrun 5th Edition system.",
   "authors": [
     {
       "name": "stevejew"

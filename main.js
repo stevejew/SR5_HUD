@@ -4,10 +4,10 @@ let hudUpdateTimer = null;
 class MyEnhancedUI extends Application {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            id: "my-enhanced-hud",
-            template: "modules/test/templates/ui.hbs",
+            id: "steve-sr5-hud",
+            template: "modules/sr5-hud/templates/ui.hbs",
             popOut: true,
-            classes: ["enhanced-hud-frame"],
+            classes: ["sr5-hud-frame"],
             width: 400,
             height: "auto",
             resizable: false,
@@ -246,7 +246,7 @@ class MyEnhancedUI extends Application {
 }
 // --- Hooks ---
 function updateMyHud() {
-    const activeWindow = Object.values(ui.windows).find(w => w.id === "my-enhanced-hud");
+    const activeWindow = Object.values(ui.windows).find(w => w.id === "steve-sr5-hud");
     if (activeWindow) {
         activeWindow._rendering = false;
         activeWindow._state = 2;
@@ -277,7 +277,7 @@ Hooks.on("renderTokenHUD", (app, html) => {
         myHudEnabled = !myHudEnabled;
         if (myHudEnabled) new MyEnhancedUI().render(true);
         else {
-            const existing = Object.values(ui.windows).find(w => w.id === "my-enhanced-hud");
+            const existing = Object.values(ui.windows).find(w => w.id === "steve-sr5-hud");
             if (existing) existing.close();
         }
         app.render();
@@ -288,7 +288,7 @@ Hooks.on("renderTokenHUD", (app, html) => {
 Hooks.on("controlToken", (token, controlled) => {
     if (!myHudEnabled) return;
     setTimeout(() => {
-        const activeWindow = Object.values(ui.windows).find(w => w.id === "my-enhanced-hud");
+        const activeWindow = Object.values(ui.windows).find(w => w.id === "steve-sr5-hud");
         if (canvas.tokens.controlled[0]) {
             if (!activeWindow) new MyEnhancedUI().render(true);
             else activeWindow.render(true);
