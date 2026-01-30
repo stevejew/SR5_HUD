@@ -1,0 +1,519 @@
+/* 1. 테마 변수 설정 */
+:root {
+    --my-hud-bg: rgba(0, 0, 0, 0.85); /* 가독성을 위해 불투명도 약간 증가 */
+    --my-hud-border: #c9a063;
+    --my-hud-text: #f0f0f0;
+    --my-frame-url: url('/modules/test/images/frame.png');
+}
+
+/* 2. FVTT 기본 창 스타일 제거 및 고정 */
+.enhanced-hud-frame {
+    position: fixed !important;
+    left: 20px !important;
+    bottom: 20px !important; /* 위치를 여기서 잡음 */
+    top: auto !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    z-index: 60;
+}
+
+.enhanced-hud-frame .window-header {
+    display: none !important; 
+}
+
+    .enhanced-hud-frame .window-content {
+        background: none !important;
+        padding: 0;
+        overflow: visible !important; /* 자식인 마법 창이 삐져나와도 보이게 */
+        pointer-events: none !important; /* 울타리 자체는 클릭 통과 */
+    }
+
+/* 3. 메인 컨테이너 (이미지 대신 색상 배경 사용) */
+.enhanced-hud-container {
+    position: relative !important; /* 부모(frame) 안에 자리를 잡도록 relative로 변경 */
+    z-index: 1000 !important;
+    /* pointer-events: none;  <-- 이 줄을 지우거나 아래처럼 auto로 바꿔! */
+    pointer-events: auto !important;
+    width: 400px;
+    height: auto;
+    background: #1a1a1a !important;
+    color: #ffffff !important;
+    border: 2px solid var(--my-hud-border) !important;
+    border-radius: 8px !important;
+    padding: 20px !important;
+    box-sizing: border-box;
+    overflow: visible !important;
+    pointer-events: auto !important; /* << 매우 중요: 여기를 auto로 해야 내부 버튼이 눌림! */
+    filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.8));
+}
+
+/* 헤더 텍스트 색상 강제 */
+.token-details, .token-name, .track-physical, .track-stun {
+    color: #ffffff !important;
+    text-shadow: none !important; /* 단색 배경에서는 그림자가 없는 게 더 깔끔할 수 있음 */
+}
+
+/* 4. 내부 레이아웃 - 클릭이 필요한 모든 요소에 auto 설정 */
+.hud-header {
+    display: flex !important;       /* 가로 배치를 강제  */
+    flex-direction: row !important; /* 왼쪽에서 오른쪽으로 배치  */
+    align-items: flex-start !important; /* 상단 정렬  */
+    gap: 15px !important;           /* 초상화와 텍스트 사이 간격  */
+    margin-bottom: 20px !important; /* 아래쪽 그리드와의 간격  */
+    pointer-events: auto !important; /* 클릭 가능하게 설정  */
+    width: 100% !important;         /* 전체 너비 사용  */
+}
+
+.sub-menu,
+.dropdown-content {
+    background: var(--my-hud-bg);
+    border: 2px solid var(--my-hud-border);
+    max-height: 300px; /* 가독성을 위해 조금 늘림 */
+    overflow-y: auto;
+    position: absolute;
+    top: auto; /* 버튼 바로 위로 딱 붙게 */
+    left: 0;
+    width: 100%;
+    z-index: 1000 !important; /* 최상단으로 */
+    pointer-events: auto !important; /* 클릭 가능하게 */
+    display: block; /* display:none과 중복되지 않게 기본은 block */
+}
+
+/* 버튼 공통 스타일: HUD 테두리 색상과 통일 */
+.action-btn {
+    background: rgba(40, 40, 40, 0.9) !important; /* 어두운 회색 배경 */
+    border: 1px solid var(--my-hud-border) !important; /* HUD 기본 금색 테두리 */
+    color: var(--my-hud-text) !important;             /* HUD 기본 텍스트 색상 */
+    pointer-events: auto !important;
+    padding: 8px 15px !important;
+    font-size: 13px !important;
+    font-weight: bold !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: none !important;    /* 네온 효과 제거 */
+    text-shadow: none !important;   /* 네온 효과 제거 */
+}
+
+/* 마우스를 올렸을 때 효과 */
+.action-btn:hover {
+    background: var(--my-hud-border) !important; /* 배경을 금색으로 */
+    color: #000 !important;                      /* 글자는 검은색으로 */
+}
+
+/* 기술(Toggle) 버튼도 동일하게 통일 */
+.action-btn.toggle-btn {
+    border-color: var(--my-hud-border) !important;
+    color: var(--my-hud-text) !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+/* 버튼 그리드 간격 조정 */
+.action-grid {
+    display: grid !important; 
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    padding: 10px !important;
+    pointer-events: auto !important; /* 이 부분이 없으면 버튼이 안 눌리거나 사라져 보일 수 있음 */
+}
+
+/* 1. 초상화와 방패를 담는 바구니 */
+.portrait-container {
+    position: relative; /* 방패 위치의 기준점 */
+    width: 60px;
+    height: 80px;
+    flex-shrink: 0; /* 크기 고정 */
+    border: 2px solid var(--my-hud-border); /* 테두리를 여기로 이동 */
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    pointer-events: auto !important;
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+
+    .portrait-container:hover {
+        filter: brightness(1.3);
+        border-color: #ffffff; /* 테두리도 살짝 밝게 강조하고 싶다면 추가 */
+        box-shadow: 0 0 15px rgba(201, 160, 99, 0.4); /* 금색 광원 효과 */
+    }
+
+    .portrait-container:active {
+        transform: scale(0.95);
+        filter: brightness(0.9);
+    }
+
+/* 2. 실제 초상화 이미지 */
+.token-portrait {
+    width: 100%;                /* 컨테이너 너비에 맞춤 */
+    height: 100%;               /* 컨테이너 높이에 맞춤 */
+    display: block;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 2px;         /* 컨테이너보다 살짝 작게 */
+    border: none !important;    /* 기존 테두리 제거 */
+}
+
+/* 3. 방패 아이콘 배치 */
+.armor-badge {
+    position: absolute;
+    bottom: -6px;
+    right: -6px;
+    width: 28px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100 !important;        /* z-index를 대폭 높임 */
+    cursor: pointer !important;     /* 마우스 올리면 손가락 모양으로 변경 */
+    pointer-events: auto !important; /* 클릭 이벤트 허용 */
+}
+
+.armor-badge:hover {
+    filter: brightness(1.3);
+    border-color: #ffffff; /* 테두리도 살짝 밝게 강조하고 싶다면 추가 */
+    box-shadow: 0 0 15px rgba(201, 160, 99, 0.4); /* 금색 광원 효과 */
+}
+
+.portrait-container:has(.armor-badge:hover) {
+    filter: brightness(1.0);
+    border-color: var(--my-hud-border);
+    box-shadow: none;
+}
+
+.armor-badge:active {
+    transform: scale(0.95);
+    filter: brightness(0.9);
+}
+
+.armor-badge i {
+    font-size: 28px;
+    color: var(--my-hud-border);
+    filter: drop-shadow(0 0 3px #000);
+    position: absolute;
+}
+
+.armor-num {
+    position: relative;
+    z-index: 11;
+    font-size: 12px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 1px 1px 2px #000;
+    margin-top: -2px;
+}
+
+/* 4. 기존 상세 정보 스타일 유지 */
+.token-details {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    flex-grow: 1 !important;
+    color: var(--my-hud-text) !important;
+    text-shadow: 2px 2px 4px #000 !important;
+    white-space: nowrap !important;
+}
+
+/* 5. 기술 하위 메뉴 및 드롭다운 */
+.sub-menu {
+    display: flex;
+    gap: 5px;
+    margin-top: 15px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(201, 160, 99, 0.3);
+    border-radius: 4px;
+    position: relative;
+    z-index: 70;
+}
+
+.skill-type-btn {
+    flex: 1;
+    background: rgba(40, 40, 40, 0.9);
+    border: 1px solid var(--my-hud-border);
+    color: var(--my-hud-text);
+    padding: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.skill-type-btn:hover {
+    background: var(--my-hud-border);
+    color: #000;
+}
+
+.dropdown-content {
+    background: var(--my-hud-bg);
+    border: 2px solid var(--my-hud-border);
+    max-height: 250px;
+    overflow-y: auto;
+    position: absolute;
+    bottom: 110%; /* 버튼 위쪽으로 띄움  */
+    left: 0;
+    width: 100%; /* 하위 메뉴 너비와 맞춤 */
+    z-index: 100;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+}
+
+/* 검색창 컨테이너 레이아웃 */
+.search-box {
+    display: flex !important;
+    flex-direction: row !important; /* 가로 방향 고정 */
+    align-items: center !important; /* 세로 중앙 정렬 */
+    gap: 10px !important;           /* 입력창과 체크박스 사이 간격 */
+    padding: 8px !important;
+    background: #111;
+    position: sticky;
+    top: 0;
+    z-index: 101;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* 검색 입력 필드 */
+.skill-search {
+    flex: 1 !important;            /* 남는 공간을 입력창이 다 차지함 */
+    min-width: 0;                   /* flex 박스 내에서 찌그러짐 방지 */
+    background-color: #1a1a1a !important;
+    color: #ffffff !important;
+    border: 1px solid var(--my-hud-border) !important;
+    padding: 5px 8px !important;
+}
+
+/* 체크박스 라벨 (글자 밀림 방지) */
+.filter-label {
+    display: flex !important;
+    flex-direction: row !important; /* 라벨 안에서도 체크박스와 글자를 가로로 */
+    align-items: center !important;
+    gap: 5px !important;
+    white-space: nowrap !important; /* 글자가 절대 아래로 밀리지 않게 함 */
+    color: var(--my-hud-border) !important;
+    font-size: 12px !important;
+    cursor: pointer;
+    flex-shrink: 0 !important;      /* 라벨 영역이 좁아지지 않게 고정 */
+}
+
+/* 체크박스 크기 및 색상 */
+.filter-zero {
+    margin: 0 !important;
+    accent-color: var(--my-hud-border) !important;
+    width: 16px !important;
+    height: 16px !important;
+    cursor: pointer;
+}
+
+.skill-search:focus {
+    outline: none;
+    border-color: #fff !important;
+    box-shadow: 0 0 5px var(--my-hud-border);
+}
+
+/* 입력창의 placeholder(안내 문구) 색상도 보기 좋게 조정 */
+.skill-search::placeholder {
+    color: #888;
+    font-style: italic;
+}
+
+.skill-item {
+    display: flex;
+    justify-content: space-between;
+		background: #1a1a1a !important; /* 어두운 배경 */
+    color: #ffffff !important;      /* 글자색을 완전한 흰색으로 강제 */
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 13px;
+}
+
+.skill-item:hover {
+    background: var(--my-hud-border);
+    color: black;
+}
+
+.hidden {
+    display: none !important;
+    pointer-events: none !important;
+}
+/* 지식 기술 레이아웃 보정 */
+.knowledge-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#action-menu {
+    margin-top: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 5px;
+    padding: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.skill-info {
+    display: flex;
+    gap: 10px; /* 이름과 유형 사이 간격 */
+    align-items: baseline;
+}
+
+.skill-type {
+    font-size: 10px;
+    color: var(--my-hud-border);
+    opacity: 0.7;
+}
+
+/* Token HUD 버튼 박스 강제 교정 */
+#token-hud .control-icon {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 0 !important;   /* 내부 여백 제거 */
+}
+
+/* 아이콘 위치 및 크기 강제 교정 */
+#token-hud .control-icon i {
+    display: inline-block !important;
+    width: auto !important;
+    height: auto !important;
+    line-height: 1 !important; /* 줄간격 강제 초기화 */
+    margin: 0 !important;      /* 마진 강제 제거 */
+    font-size: 20px;           /* 아이콘 크기 (필요시 조정) */
+    text-align: center !important;
+}
+
+/* 소지품 섹션 전체 컨테이너 */
+.inventory-section {
+    margin-top: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 5px;
+    padding: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* 카테고리 제목 (Combat, Gear 등) */
+.category-title {
+    background: #444;
+    color: #ffda44;
+    padding: 3px 8px;
+    font-weight: bold;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    border-left: 3px solid #ffda44;
+    margin: 10px 0 5px 0;
+}
+
+/* 개별 아이템 항목 줄 전체 */
+.inventory-item {
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    /* 줄 전체 클릭 커서를 기본으로 변경하여 혼동 방지 */
+    cursor: default !important;
+    transition: background 0.2s;
+}
+
+/* 1. 아이템 이미지 (주사위 굴림 영역) */
+.item-roll {
+    border: 1px solid #555;
+    margin-right: 8px;
+    border-radius: 3px;
+    object-fit: cover;
+    cursor: pointer !important; /* 클릭 가능함을 표시 */
+    transition: all 0.2s;
+}
+
+    /* 이미지에 마우스를 올렸을 때 효과 */
+    .item-roll:hover {
+        filter: brightness(1.3);
+        border-color: #ffda44 !important;
+        box-shadow: 0 0 5px rgba(255, 218, 68, 0.5);
+    }
+
+/* 2. 아이템 이름 (시트 열기 영역) */
+.item-name {
+    flex: 1;
+    font-size: 0.95em;
+    color: #eee;
+    cursor: pointer !important; /* 클릭 가능함을 표시 */
+    padding: 2px 0;
+}
+
+    /* 이름에 마우스를 올렸을 때 효과 */
+    .item-name:hover {
+        color: #ffda44 !important;
+        text-decoration: underline; /* 링크 같은 느낌 부여 */
+    }
+
+/* 아이템 타입 (클릭 불가) */
+.item-type, .skill-type {
+    font-size: 0.75em;
+    color: #888;
+    text-transform: capitalize;
+    pointer-events: none; /* 클릭 방지 */
+}
+
+.inventory-item:hover {
+    background: rgba(255, 218, 68, 0.2);
+}
+
+/* 아이템 이미지 */
+.inventory-item img {
+    border: 1px solid #555;
+    margin-right: 8px;
+    border-radius: 3px;
+    object-fit: cover;
+}
+
+/* 아이템 텍스트 */
+.item-name {
+    flex: 1;
+    font-size: 0.95em;
+    color: #eee;
+}
+
+.item-type {
+    font-size: 0.75em;
+    color: #888;
+    text-transform: capitalize;
+}
+
+/* 1. 공통 설정: 이 설정이 없으면 창이 공중에 안 떠! */
+.sub-menu,
+.dropdown-content {
+    position: absolute !important;
+    left: 0 !important;
+    width: 100% !important;
+    bottom: 100% !important; /* 모든 창은 일단 메인 창 천장에서 시작 */
+    top: auto !important;
+    background: var(--my-hud-bg);
+    border: 2px solid var(--my-hud-border);
+    border-radius: 4px;
+    z-index: 2000 !important;
+    pointer-events: auto !important;
+}
+
+/* 2. 분류 버튼 (활성형, 지식, 언어): 메인 HUD 바닥 '아래'로 */
+.sub-menu {
+    margin-bottom: 5px; /* 메인 창과 5px 간격 */
+    display: flex;
+    gap: 5px;
+    padding: 8px;
+}
+
+/* 3. 실제 기술 목록 창: 메인 HUD 천장 '위'로 */
+.dropdown-content {
+    /* 분류 버튼 높이가 보통 45~50px 정도니까, 그만큼 더 높게 띄움 */
+    margin-bottom: 55px;
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+}
+
+/* 4. [매우 중요] 컨테이너 설정 */
+.enhanced-hud-container {
+    position: relative !important;
+    overflow: visible !important; /* 이게 없으면 위로 띄운 창들이 안 보여 */
+}
