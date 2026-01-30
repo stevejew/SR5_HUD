@@ -1,4 +1,4 @@
-<div class="enhanced-hud-container">
+<div class="sr5-hud-container">
     <div class="hud-header">
         <div class="portrait-container" title="시트 열기/닫기">
             <img src="{{img}}" class="token-portrait">
@@ -26,18 +26,22 @@
         <button class="action-btn toggle-btn" data-action="action-menu">행동</button>
     </div>
 
-    <div id="action-menu" class="dropdown-content hidden">
-        {{#each actionData as |items category|}}
-        <div class="category-title">{{category}}</div>
-        {{#each items}}
-        <div class="inventory-item" data-item-id="{{this.id}}">
-            <img class="item-roll" src="{{this.img}}" width="24" height="24" title="굴림">
-            <span class="item-name">{{this.name}}</span>
-            <span class="item-type">{{this.label}}</span>
-        </div>
-        {{/each}}
-        {{/each}}
-    </div>
+    <div id="action-menu" class="dropdown-content inventory-section hidden">
+        <div class="inventory-header">행동 목록</div>
+        <div class="skill-list-container"> {{#each actionData as |items category|}}
+            <div class="inventory-category"> <div class="category-title" style="background: #444; color: #ffda44; padding: 2px 5px; font-size: 0.8em; margin-top: 5px;">
+                    {{category}}
+                </div>
+                {{#each items}}
+                <div class="inventory-item skill-item" data-item-id="{{this.id}}">
+                    <img class="item-roll" src="{{this.img}}" width="20" height="20" style="margin-right: 5px; border-radius: 2px; cursor: pointer;" title="굴림">
+                    <span class="skill-name item-name" style="cursor: pointer;">{{this.name}}</span>
+                    <span class="skill-type" style="font-size: 0.7em; color: #888; margin-left: auto;">{{this.label}}</span>
+                </div>
+                {{/each}}
+            </div>
+            {{/each}}
+        </div> </div>
 
 
     <div id="skill-menu" class="sub-menu hidden">
