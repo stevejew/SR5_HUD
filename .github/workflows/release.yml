@@ -1,0 +1,81 @@
+name: Release FVTT Module
+
+on:
+  push:
+    tags:
+      - '*.*.*'  # v 접두사 없이 숫자.숫자.숫자 형식의 태그 푸시 시 실행
+
+permissions:
+  contents: write
+  packages: write
+  actions: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.MY_PERSONAL_TOKEN }}
+    steps:
+      # 1. 저장소 체크아웃
+      - uses: actions/checkout@v4
+
+      # 2. 태그에서 version 추출
+      - name: Set version from tag
+        id: get_version
+        run: |
+          echo "GITHUB_REF=$GITHUB_REF"
+          if [[ "$GITHUB_REF" =~ refs/tags/([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+          else
+            echo "::error ::Invalid tag format. Use X.Y.Z"
+            exit 1
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+
+      # 3. Release용 module.json 갱신
+      - name: Update module.json for Release
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const path = 'module.json';
+          const version = process.env.VERSION;
+          const repo = process.env.GITHUB_REPOSITORY;
+
+          if (!version || !repo) {
+            console.error("VERSION or GITHUB_REPOSITORY is undefined. Exiting.");
+            process.exit(1);
+          }
+
+          try {
+            const json = JSON.parse(fs.readFileSync(path, 'utf8'));
+
+            // version, download, manifest, id 갱신
+            json.version = version;
+            json.download = `https://github.com/${repo}/releases/download/${version}/SR5HUD.zip`;
+            json.manifest = `https://github.com/${repo}/releases/latest/download/module.json`;
+            if (!json.id) json.id = "sr5-hud";
+
+            fs.writeFileSync(path, JSON.stringify(json, null, 2), 'utf8');
+            console.log("module.json updated successfully.");
+          } catch (error) {
+            console.error(`Failed to update module.json: ${error.message}`);
+            process.exit(1);
+          }
+          EOF
+        env:
+          VERSION: ${{ steps.get_version.outputs.version }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
+      # 4. ZIP 빌드 (업데이트된 module.json 포함)
+      - name: Build module ZIP
+        run: |
+          zip -r SR5ko.zip . -x ".git/*" ".github/*"
+
+      # 5. Release 생성 및 파일 업로드
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            SR5HUD.zip
+            module.json
