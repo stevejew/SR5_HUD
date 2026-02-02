@@ -17,14 +17,17 @@
 
     <div class="action-grid">
         <button class="action-btn toggle-btn" data-target="skill-menu">기술</button>
-        <button class="action-btn toggle-btn" data-target="inventory-window">소지품</button>
-        {{#if specialButtonLabel}}
-        <button class="action-btn toggle-btn special-btn" data-target="special-menu">
+        <button class="action-btn toggle-btn" data-target="inventory-menu">소지품</button>
+        <button class="action-btn toggle-btn special-btn {{#unless specialButtonLabel}}hidden-btn{{/unless}}"
+                data-target="special-menu">
+            {{#if specialButtonLabel}}
             {{specialButtonLabel}}
+            {{else}}
+            특수
+            {{/if}}
         </button>
-        {{/if}}
-        <button class="action-btn toggle-btn" data-action="action-menu">행동</button>
-    </div>
+            <button class="action-btn toggle-btn" data-action="action-menu">행동</button>
+</div>
 
     <div id="action-menu" class="dropdown-content inventory-section hidden">
         <div class="inventory-header">행동 목록</div>
@@ -61,7 +64,7 @@
             {{#each skills.active}}
             <div class="skill-item" data-id="{{@key}}">
                 <span class="skill-name">{{this.displayName}}</span>
-                <span class="skill-rating">({{this.value}})</span>
+                <span class="skill-rating">{{this.value}} 등급</span>
             </div>
             {{/each}}
         </div>
@@ -79,28 +82,28 @@
             {{#each skills.knowledge.academic.value}}
             <div class="skill-item knowledge-item" data-id="{{@key}}">
                 <div class="skill-info"><span class="skill-name">{{this.name}}</span><span class="skill-type">[학술적]</span></div>
-                <span class="skill-rating">({{this.value}})</span>
+                <span class="skill-rating">{{this.value}} 등급</span>
             </div>
             {{/each}}
             {{!-- 흥미 지식 --}}
             {{#each skills.knowledge.interests.value}}
             <div class="skill-item knowledge-item" data-id="{{@key}}">
                 <div class="skill-info"><span class="skill-name">{{this.name}}</span><span class="skill-type">[흥미]</span></div>
-                <span class="skill-rating">({{this.value}})</span>
+                <span class="skill-rating">{{this.value}} 등급</span>
             </div>
             {{/each}}
             {{!-- 전문 지식 --}}
             {{#each skills.knowledge.professional.value}}
             <div class="skill-item knowledge-item" data-id="{{@key}}">
                 <div class="skill-info"><span class="skill-name">{{this.name}}</span><span class="skill-type">[전문적]</span></div>
-                <span class="skill-rating">({{this.value}})</span>
+                <span class="skill-rating">{{this.value}} 등급</span>
             </div>
             {{/each}}
             {{!-- 거리 지식 --}}
             {{#each skills.knowledge.street.value}}
             <div class="skill-item knowledge-item" data-id="{{@key}}">
                 <div class="skill-info"><span class="skill-name">{{this.name}}</span><span class="skill-type">[거리]</span></div>
-                <span class="skill-rating">({{this.value}})</span>
+                <span class="skill-rating">{{this.value}} 등급</span>
             </div>
             {{/each}}
         </div>
@@ -118,14 +121,20 @@
             {{#if this.name}}
             <div class="skill-item" data-id="{{@key}}">
                 <span class="skill-name">{{this.name}}</span>
-                <span class="skill-rating">({{this.value}})</span>
+                <span class="skill-rating">
+                    {{#if this.isNative}}
+                    N
+                    {{else}}
+                    {{this.value}} 등급
+                    {{/if}}
+                </span>
             </div>
             {{/if}}
             {{/each}}
         </div>
     </div>
 
-    <div id="inventory-window" class="inventory-section dropdown-content hidden">
+    <div id="inventory-menu" class="inventory-section dropdown-content hidden">
         <div class="inventory-header">소지품 목록</div>
         <div class="skill-list-container">
             {{#each inventory as |items category|}}
