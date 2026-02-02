@@ -70,7 +70,7 @@ jobs:
       # 4. ZIP 빌드 (업데이트된 module.json 포함)
       - name: Build module ZIP
         run: |
-          zip -r SR5ko.zip . -x ".git/*" ".github/*"
+          zip -r SR5HUD.zip . -x ".git/*" ".github/*"
 
       # 5. Release 생성 및 파일 업로드
       - name: Create Release
