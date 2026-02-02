@@ -17,6 +17,7 @@
   "scripts": [],
   "dependencies": [],
   "url": "https://github.com/stevejew/SR5_HUD",
-  "download": "https://github.com/stevejew/SR5_HUD/releases/download/1.3.2/SR5ko.zip",
+  "download": "https://github.com/stevejew/SR5_HUD/releases/download/*.*.*/SR5HUD.zip",
   "manifest": "https://github.com/stevejew/SR5_HUD/releases/latest/download/module.json"
 }
+
