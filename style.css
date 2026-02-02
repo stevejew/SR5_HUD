@@ -56,7 +56,13 @@
     max-height: 300px;
     overflow-y: auto;
     box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
-} 
+}
+
+#special-menu,
+#inventory-menu,
+#action-menu {
+    margin-bottom: 10px;
+}
 
 /* 3. 메인 컨테이너 (이미지 대신 색상 배경 사용) */
 .sr5-hud-container {
@@ -73,7 +79,6 @@
     padding: 20px !important;
     box-sizing: border-box;
     overflow: visible !important;
-    pointer-events: auto !important; /* << 매우 중요: 여기를 auto로 해야 내부 버튼이 눌림! */
     filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.8));
 }
 
@@ -130,6 +135,11 @@
     gap: 8px !important;
     padding: 10px !important;
     pointer-events: auto !important; /* 이 부분이 없으면 버튼이 안 눌리거나 사라져 보일 수 있음 */
+}
+
+.hidden-btn {
+    visibility: hidden !important; /* 자리는 차지하지만 보이지 않음 */
+    pointer-events: none !important; /* 클릭 방지 */
 }
 
 /* 1. 초상화와 방패를 담는 바구니 */
@@ -314,6 +324,7 @@
     padding: 8px 12px !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
     min-height: 40px !important; /* 항목 높이 일정하게 유지 */
+    cursor: pointer !important;
 }
 
     .inventory-item:hover,

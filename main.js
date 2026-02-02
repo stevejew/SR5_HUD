@@ -148,14 +148,28 @@ class MyEnhancedUI extends Application {
         html.find('.armor-badge').click(async ev => {
             ev.preventDefault();
             ev.stopPropagation();
-            const token = getControlledToken();
-            if (!token?.actor) return;
-            const pack = game.packs.get("shadowrun5e.sr5e-general-actions");
-            if (!pack) return;
-            const item = await pack.getDocument("wWeIV09KjkZvjJKb");
-            if (item && item.castAction) {
-                await item.castAction(new Event("click"), token.actor);
-            }
+            (async () => {
+                // grab the actor, here we take it from the sidebar by it's name
+                const actor = canvas.tokens.controlled[0]?.actor || game.user.character;
+
+                // setup a partial action with only those values we need.  
+                const partAction = {
+                    // each test knows it's default values for categories, modifiers and sometimes values.
+                    // otherwise you can overwrite it by setting its action property here manually.
+                    test: 'PhysicalResistTest',
+                    armor: true,
+                    attribute: 'body'
+                };
+                // setup the full action, taking our values.
+                const action = game.shadowrun5e.data.createData('action_roll', partAction);
+
+                // create a test from the action with that actor.
+                // this will setup the test, grab the correct one based on partAction.test above
+                // ...and grab defined values from the actor.
+                const test = await game.shadowrun5e.test.fromAction(action, actor);
+
+                await test.execute();
+            })();
         });
 
         // 2. 통합 토글 로직 (행동, 기술, 소지품, 마법 버튼)
