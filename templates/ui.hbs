@@ -26,27 +26,40 @@
             특수
             {{/if}}
         </button>
-            <button class="action-btn toggle-btn" data-action="action-menu">행동</button>
-</div>
+        <button class="action-btn toggle-btn" data-target="action-menu">행동</button>
+    </div>
 
+    {{!-- 행동 메뉴 --}}
     <div id="action-menu" class="dropdown-content inventory-section hidden">
         <div class="inventory-header">행동 목록</div>
-        <div class="skill-list-container"> {{#each actionData as |items category|}}
-            <div class="inventory-category"> <div class="category-title" style="background: #444; color: #ffda44; padding: 2px 5px; font-size: 0.8em; margin-top: 5px;">
+        <div class="skill-list-container">
+            {{#each actionData as |items category|}}
+            <div class="inventory-category">
+                <div class="category-title" style="background: #444; color: #ffda44; padding: 2px 5px; font-size: 0.8em; margin-top: 5px;">
                     {{category}}
                 </div>
                 {{#each items}}
-                <div class="inventory-item skill-item" data-item-id="{{this.id}}">
+                <div class="inventory-item skill-item"
+                     data-item-id="{{this.id}}"
+                     data-id="{{this.id}}"
+                     data-action-id="{{this.actionId}}"
+                     data-pack="{{this.pack}}"
+                     data-is-pack="{{this.isPack}}">
+
                     <img class="item-roll" src="{{this.img}}" width="20" height="20" style="margin-right: 5px; border-radius: 2px; cursor: pointer;" title="굴림">
                     <span class="skill-name item-name" style="cursor: pointer;">{{this.name}}</span>
-                    <span class="skill-type" style="font-size: 0.7em; color: #888; margin-left: auto;">{{this.label}}</span>
+
+                    <span class="skill-type" style="font-size: 0.7em; color: #888; margin-left: auto;">
+                        {{#if this.isPack}}일반 행동{{else}}{{this.label}}{{/if}}
+                    </span>
                 </div>
                 {{/each}}
             </div>
             {{/each}}
-        </div> </div>
+        </div>
+    </div>
 
-
+    {{!-- 기술 메뉴 --}}
     <div id="skill-menu" class="sub-menu hidden">
         <button class="skill-type-btn" data-target="active-list">활성형</button>
         <button class="skill-type-btn" data-target="knowledge-list">지식</button>
@@ -78,28 +91,24 @@
             </label>
         </div>
         <div class="skill-list-container">
-            {{!-- 학술 지식 --}}
             {{#each skills.knowledge.academic.value}}
             <div class="skill-item knowledge-item" data-id="{{@key}}">
-                <div class="skill-info"><span class="skill-name">{{this.name}}</span><span class="skill-type">[학술적]</span></div>
+                <div class="skill-info"><span class="skill-name">{{this.name}}</span><span class="skill-type">[학술]</span></div>
                 <span class="skill-rating">{{this.value}} 등급</span>
             </div>
             {{/each}}
-            {{!-- 흥미 지식 --}}
             {{#each skills.knowledge.interests.value}}
             <div class="skill-item knowledge-item" data-id="{{@key}}">
                 <div class="skill-info"><span class="skill-name">{{this.name}}</span><span class="skill-type">[흥미]</span></div>
                 <span class="skill-rating">{{this.value}} 등급</span>
             </div>
             {{/each}}
-            {{!-- 전문 지식 --}}
             {{#each skills.knowledge.professional.value}}
             <div class="skill-item knowledge-item" data-id="{{@key}}">
-                <div class="skill-info"><span class="skill-name">{{this.name}}</span><span class="skill-type">[전문적]</span></div>
+                <div class="skill-info"><span class="skill-name">{{this.name}}</span><span class="skill-type">[전문]</span></div>
                 <span class="skill-rating">{{this.value}} 등급</span>
             </div>
             {{/each}}
-            {{!-- 거리 지식 --}}
             {{#each skills.knowledge.street.value}}
             <div class="skill-item knowledge-item" data-id="{{@key}}">
                 <div class="skill-info"><span class="skill-name">{{this.name}}</span><span class="skill-type">[거리]</span></div>
@@ -121,19 +130,14 @@
             {{#if this.name}}
             <div class="skill-item" data-id="{{@key}}">
                 <span class="skill-name">{{this.name}}</span>
-                <span class="skill-rating">
-                    {{#if this.isNative}}
-                    N
-                    {{else}}
-                    {{this.value}} 등급
-                    {{/if}}
-                </span>
+                <span class="skill-rating">{{#if this.isNative}}N{{else}}{{this.value}} 등급{{/if}}</span>
             </div>
             {{/if}}
             {{/each}}
         </div>
     </div>
 
+    {{!-- 소지품 메뉴 --}}
     <div id="inventory-menu" class="inventory-section dropdown-content hidden">
         <div class="inventory-header">소지품 목록</div>
         <div class="skill-list-container">
@@ -145,16 +149,17 @@
                 {{#each items}}
                 <div class="inventory-item skill-item" data-id="{{this.id}}">
                     <img src="{{this.img}}" class="item-roll" width="20" height="20" style="margin-right: 5px; border-radius: 2px; cursor: pointer;" title="판정 굴림">
-
-                    <span class="skill-name item-name" style="cursor: pointer; " title="물품 시트 열기">{{this.name}}</span>
-
+                    <span class="skill-name item-name" style="cursor: pointer;">{{this.name}}</span>
                     <span class="skill-type" style="font-size: 0.7em; color: #888; margin-left: auto;">{{this.label}}</span>
                 </div>
                 {{/each}}
             </div>
             {{/each}}
         </div>
-    </div> {{#if specialData}}
+    </div>
+
+    {{!-- 특수 메뉴 (마법/공명) --}}
+    {{#if specialData}}
     <div id="special-menu" class="inventory-section dropdown-content hidden">
         <div class="inventory-header">{{specialButtonLabel}} 목록</div>
         <div class="skill-list-container">
@@ -175,5 +180,4 @@
         </div>
     </div>
     {{/if}}
-
-</div> ```
+</div>
