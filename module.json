@@ -7,18 +7,20 @@
       "name": "stevejew"
     }
   ],
-  "version": "1.3.2",
+  "version": "0.0.1",
   "compatibility": {
     "minimum": "13",
     "verified": "13"
   },
-  "esmodules": ["./main.js"],
-  "styles": ["./style.css"],
+  "esmodules": [
+    "./main.js"
+  ],
+  "styles": [
+    "./style.css"
+  ],
   "scripts": [],
   "dependencies": [],
   "url": "https://github.com/stevejew/SR5_HUD",
-  "download": "https://github.com/stevejew/SR5_HUD/releases/download/*.*.*/SR5HUD.zip",
+  "download": "https://github.com/stevejew/SR5_HUD/releases/download/0.0.1/SR5HUD.zip",
   "manifest": "https://github.com/stevejew/SR5_HUD/releases/latest/download/module.json"
 }
-
-

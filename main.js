@@ -15,12 +15,54 @@ class MyEnhancedUI extends Application {
         });
     }
 
-    getData() {
+    async getData() {
         const token = canvas.tokens.controlled[0];
         if (!token || !token.actor) return {};
 
         const actor = token.actor;
         const system = actor.system;
+
+        // packId를 먼저 정의하거나 직접 문자열을 넣어야 해
+        const packId = 'shadowrun5e.sr5e-general-actions';
+        const pack = game.packs.get(packId);
+
+        let extraActions = [];
+        if (pack) {
+            const index = await pack.getIndex();
+            const targets = ['Armor', 'Biofeedback Resist', 'Drain', 'Fade', 'Judge Intentions', 'Lift Carry', 'Physical Damage Resist', 'Physical Defense', 'Memory', 'Composure'];
+
+            extraActions = targets.map(t => {
+                const found = index.find(i => i.name.toLowerCase() === t.toLowerCase());
+
+                // [수정] 번역 키를 찾는 두 가지 후보군
+                const keyWithSpace = `SR5.Content.Actions.${t}`; // "SR5.Content.Actions.Biofeedback Resist"
+                const keyWithoutSpace = `SR5.Content.Actions.${t.replace(/\s+/g, '')}`; // "SR5.Content.Actions.BiofeedbackResist"
+
+                let translatedName = t;
+
+                // 1. 띄어쓰기 있는 키 먼저 확인
+                if (game.i18n.has(keyWithSpace)) {
+                    translatedName = game.i18n.localize(keyWithSpace);
+                }
+                // 2. 없으면 띄어쓰기 없는 키 확인
+                else if (game.i18n.has(keyWithoutSpace)) {
+                    translatedName = game.i18n.localize(keyWithoutSpace);
+                }
+                // 3. 둘 다 없으면 인덱스 라벨 확인
+                else if (found && found.label && found.label !== found.name) {
+                    translatedName = found.label;
+                }
+
+                return {
+                    name: translatedName, // 이제 '생체반응 저항'이 들어감
+                    actionId: found ? found.name : t,
+                    pack: 'sr5e-general-actions',
+                    isPack: true,
+                    type: "action",
+                    img: found ? found.img : "icons/svg/clockwork.svg"
+                };
+            });
+        }
 
         // 1. 기술 데이터 처리
         let skills = { active: {}, knowledge: {}, language: {} };
@@ -50,20 +92,9 @@ class MyEnhancedUI extends Application {
                 .map(i => {
                     const standardKey = `TYPES.Item.${i.type}`;
                     let translated = "";
-
-                    if (game.i18n.has(standardKey)) {
-                        translated = game.i18n.localize(standardKey);
-                    } else {
-                        const camelType = i.type.split('_')
-                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                            .join('');
-
-                        const backupKeys = [
-                            `SR5.ItemTypes.${camelType}`,
-                            `SR5.ItemTypes.${i.type}`,
-                            `Item.${i.type}`
-                        ];
-
+                    if (game.i18n.has(standardKey)) translated = game.i18n.localize(standardKey);
+                    else {
+                        const backupKeys = [`SR5.ItemTypes.${i.type}`, `Item.${i.type}`];
                         for (let key of backupKeys) {
                             if (game.i18n.has(key)) {
                                 translated = game.i18n.localize(key);
@@ -71,38 +102,14 @@ class MyEnhancedUI extends Application {
                             }
                         }
                     }
-
-                    // [수정 포인트] duplicate(i)를 제거함
-                    // 원본 객체 i에 직접 label 속성만 주입해서 반환해. 
-                    // 이렇게 하면 i.roll() 같은 함수가 그대로 살아있어.
                     i.label = translated || i.type;
                     return i;
                 });
         };
 
         // 3. 각 섹션별 데이터 조립
-        const actionData = {
-            "보유 행동": sortItems(getTranslatedItems(["action"]))
-        };
+        const allActions = getTranslatedItems(["action"]).concat(extraActions);
 
-        const inventory = {
-            "무기, 방어구, 탄약": sortItems(getTranslatedItems(["weapon", "armor", "ammo", "modification"])),
-            "증강물": sortItems(getTranslatedItems(["bioware", "cyberware"])),
-            "장비, 도구": sortItems(getTranslatedItems(["device", "equipment"]))
-        };
-
-        const magicData = {
-            "주문 및 의식": sortItems(getTranslatedItems(["spell", "ritual", "call_in_action"])),
-            "능력 및 메타매직": sortItems(getTranslatedItems(["adept_power", "metamagic"])),
-            "포커스 및 물품": sortItems(getTranslatedItems(["focus", "preparation"]))
-        };
-
-        const resonanceData = {
-            "컴플렉스 폼": sortItems(getTranslatedItems(["complex_form"])),
-            "에코 및 능력": sortItems(getTranslatedItems(["echo", "sprite_power", "call_in_action"]))
-        };
-
-        // 4. 최종 반환 (actionData 추가됨!)
         return {
             name: token.name,
             img: actor.img || "icons/svg/mystery-man.svg",
@@ -113,9 +120,20 @@ class MyEnhancedUI extends Application {
             },
             specialButtonLabel: system.special === "magic" ? "마법" : system.special === "resonance" ? "공명" : null,
             skills: skills,
-            inventory: inventory,
-            actionData: actionData, // 이 줄이 꼭 있어야 ui.hbs에서 쓸 수 있어!
-            specialData: system.special === "magic" ? magicData : system.special === "resonance" ? resonanceData : null
+            inventory: {
+                "무기, 방어구, 탄약": sortItems(getTranslatedItems(["weapon", "armor", "ammo", "modification"])),
+                "증강물": sortItems(getTranslatedItems(["bioware", "cyberware"])),
+                "장비, 도구": sortItems(getTranslatedItems(["device", "equipment"]))
+            },
+            actionData: { "보유 행동": sortItems(allActions) },
+            specialData: system.special === "magic" ? {
+                "주문 및 의식": sortItems(getTranslatedItems(["spell", "ritual", "call_in_action"])),
+                "능력 및 메타매직": sortItems(getTranslatedItems(["adept_power", "metamagic"])),
+                "포커스 및 물품": sortItems(getTranslatedItems(["focus", "preparation"]))
+            } : system.special === "resonance" ? {
+                "컴플렉스 폼": sortItems(getTranslatedItems(["complex_form"])),
+                "에코 및 능력": sortItems(getTranslatedItems(["echo", "sprite_power", "call_in_action"]))
+            } : null
         };
     }
 
@@ -199,25 +217,38 @@ class MyEnhancedUI extends Application {
         html.find('.item-roll').click(async ev => {
             ev.preventDefault();
             ev.stopPropagation();
+
             const token = getControlledToken();
             if (!token?.actor) return;
 
-            // data-id 또는 부모의 data-item-id에서 ID 추출
-            const id = ev.currentTarget.closest('[data-item-id]')?.dataset.itemId ||
-                ev.currentTarget.closest('[data-id]')?.dataset.id;
+            const dataset = ev.currentTarget.closest('.inventory-item')?.dataset;
+            if (!dataset) return;
 
-            const item = token.actor.items.get(id);
-            if (item) {
-                // SR5 시스템의 특수 액션 함수 우선 실행, 없으면 일반 굴림
-                if (typeof item.castAction === "function") {
-                    await item.castAction(ev, token.actor);
-                } else if (typeof item.roll === "function") {
-                    await item.roll();
-                } else if (typeof item.postItemCard === "function") {
-                    await item.postItemCard();
-                } else {
-                    ui.notifications.warn(`${item.name}은(는) 직접 굴릴 수 없는 항목입니다.`);
+            if (dataset.isPack === "true") {
+                try {
+                    // 참조 예시: await game.shadowrun5e.test.fromPackAction('팩이름', '액션이름', 액터)
+                    const test = await game.shadowrun5e.test.fromPackAction(
+                        dataset.pack,
+                        dataset.actionId,
+                        token.actor
+                    );
+
+                    if (test) {
+                        await test.execute();
+                    } else {
+                        ui.notifications.warn(`액션 '${dataset.actionId}'을(를) 찾을 수 없어.`);
+                    }
+                } catch (err) {
+                    console.error("SR5 HUD Pack Action Error:", err);
                 }
+                return;
+            }
+
+            const item = token.actor.items.get(dataset.id || dataset.itemId);
+            if (item) {
+                if (typeof item.castAction === "function") await item.castAction(ev, token.actor);
+                else if (typeof item.roll === "function") await item.roll();
+                else if (typeof item.postItemCard === "function") await item.postItemCard();
             }
         });
 
@@ -259,12 +290,10 @@ class MyEnhancedUI extends Application {
     }
 }
 // --- Hooks ---
-function updateMyHud() {
+async function updateMyHud() {
     const activeWindow = Object.values(ui.windows).find(w => w.id === "steve-sr5-hud");
     if (activeWindow) {
-        activeWindow._rendering = false;
-        activeWindow._state = 2;
-        activeWindow.render(true, { focus: false });
+        await activeWindow.render(true);
     }
 }
 
