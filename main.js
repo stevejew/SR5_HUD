@@ -1,5 +1,10 @@
+import { registerKeybindings } from "./setting.js";
 let myHudEnabled = false;
 let hudUpdateTimer = null;
+
+Hooks.once("init", () => {
+    registerKeybindings();
+});
 
 class MyEnhancedUI extends Application {
     static get defaultOptions() {
@@ -289,6 +294,9 @@ class MyEnhancedUI extends Application {
         });
     }
 }
+
+window.MyEnhancedUI = MyEnhancedUI; 
+
 // --- Hooks ---
 async function updateMyHud() {
     const activeWindow = Object.values(ui.windows).find(w => w.id === "steve-sr5-hud");
