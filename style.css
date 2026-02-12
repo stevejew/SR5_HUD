@@ -270,8 +270,11 @@
     box-sizing: border-box;
 }
 
-/* 검색 입력 필드 */
-.skill-search {
+/* 검색 입력 필드 (모든 섹션 공통) */
+.skill-search,
+.action-search,
+.item-search,
+.special-search {
     flex: 1 !important;            /* 남는 공간을 입력창이 다 차지함 */
     min-width: 0;                   /* flex 박스 내에서 찌그러짐 방지 */
     background-color: #1a1a1a !important;
@@ -302,14 +305,20 @@
     cursor: pointer;
 }
 
-.skill-search:focus {
+.skill-search:focus,
+.action-search:focus,
+.item-search:focus,
+.special-search:focus {
     outline: none;
     border-color: #fff !important;
     box-shadow: 0 0 5px var(--my-hud-border);
 }
 
 /* 입력창의 placeholder(안내 문구) 색상도 보기 좋게 조정 */
-.skill-search::placeholder {
+.skill-search::placeholder,
+.action-search::placeholder,
+.item-search::placeholder,
+.special-search::placeholder {
     color: #888;
     font-style: italic;
 }
