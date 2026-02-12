@@ -31,6 +31,11 @@
 
     {{!-- 행동 메뉴 --}}
     <div id="action-menu" class="dropdown-content inventory-section hidden">
+        {{!-- ✨ 검색창 추가 --}}
+        <div class="search-box">
+            <input type="text" class="action-search" placeholder="행동 검색...">
+        </div>
+        
         <div class="inventory-header">행동 목록</div>
         <div class="skill-list-container">
             {{#each actionData as |items category|}}
@@ -139,6 +144,11 @@
 
     {{!-- 소지품 메뉴 --}}
     <div id="inventory-menu" class="inventory-section dropdown-content hidden">
+        {{!-- ✨ 검색창 추가 --}}
+        <div class="search-box">
+            <input type="text" class="item-search" placeholder="소지품 검색...">
+        </div>
+        
         <div class="inventory-header">소지품 목록</div>
         <div class="skill-list-container">
             {{#each inventory as |items category|}}
@@ -161,6 +171,11 @@
     {{!-- 특수 메뉴 (마법/공명) --}}
     {{#if specialData}}
     <div id="special-menu" class="inventory-section dropdown-content hidden">
+        {{!-- ✨ 검색창 추가 --}}
+        <div class="search-box">
+            <input type="text" class="item-search special-search" placeholder="{{specialButtonLabel}} 검색...">
+        </div>
+        
         <div class="inventory-header">{{specialButtonLabel}} 목록</div>
         <div class="skill-list-container">
             {{#each specialData as |items category|}}
